@@ -1,0 +1,11 @@
+{
+  "name":"LIÊN HOA PINYIN",
+  "short_name":"Liên Hoa Pinyin",
+  "description":"Bộ gõ Pinyin và công cụ học tiếng Trung của Liên Hoa Global Education",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#f6f1e8",
+  "theme_color":"#a70f19",
+  "lang":"vi",
+  "icons":[]
+}
