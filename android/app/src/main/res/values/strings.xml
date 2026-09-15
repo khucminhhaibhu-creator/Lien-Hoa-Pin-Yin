@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Liên Hoa Pinyin</string>
+    <string name="ime_name">Liên Hoa Pinyin Keyboard</string>
+    <string name="ime_subtype">Pinyin</string>
+</resources>
