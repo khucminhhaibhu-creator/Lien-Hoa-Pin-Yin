@@ -1,5 +1,6 @@
-const CACHE='lien-hoa-pinyin-v1';
-const ASSETS=['./','./index.html','./manifest.webmanifest'];
+const CACHE='lien-hoa-pinyin-v2';
+const ASSETS=['./','./index.html','./manifest.webmanifest','./pinyin-keyboard.js'];
+const inject=async response=>{try{let text=await response.text();if(text.includes('pinyin-keyboard.js'))return new Response(text,{headers:{'Content-Type':'text/html; charset=utf-8'}});text=text.replace('</body>','<script src="./pinyin-keyboard.js"></script></body>');return new Response(text,{headers:{'Content-Type':'text/html; charset=utf-8'}})}catch{return response}};
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return res}).catch(()=>caches.match('./index.html'))))});
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();return inject(r).then(out=>{caches.open(CACHE).then(c=>c.put('./index.html',out.clone()));return out})}).catch(()=>caches.match('./index.html')));return}e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return res}).catch(()=>caches.match('./index.html'))))});
