@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#b5121b">
+  <title>Liên Hoa Pinyin</title>
+  <style>
+    :root{--red:#b5121b;--dark:#7e0c12;--cream:#faf7f0;--gold:#d9b24c}
+    *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#fff,#f7eee0);color:#222}
+    .app{max-width:900px;margin:auto;min-height:100vh;padding:18px}.header{background:linear-gradient(135deg,var(--dark),var(--red));color:#fff;border-radius:20px;padding:22px;text-align:center;box-shadow:0 8px 25px #0002}.logo{font-size:28px;font-weight:800;letter-spacing:1px}.slogan{margin-top:6px;color:#ffe8a8;font-size:13px;font-weight:700}
+    .card{background:#fff;border-radius:18px;padding:18px;margin-top:16px;box-shadow:0 5px 20px #00000012}.label{font-weight:700;margin-bottom:8px;color:var(--dark)}textarea{width:100%;min-height:110px;border:2px solid #eadbc8;border-radius:14px;padding:14px;font-size:24px;resize:vertical;outline:none}textarea:focus{border-color:var(--red)}
+    .tones{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:12px}.key{border:0;border-radius:12px;background:#f5eee5;padding:14px 6px;font-size:20px;font-weight:700;cursor:pointer}.key:hover{background:#ead9bf}.key.tone{color:var(--red)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.action{border:0;border-radius:12px;padding:12px 18px;background:var(--red);color:#fff;font-weight:700;cursor:pointer}.action.secondary{background:#eee;color:#333}.output{font-size:30px;min-height:70px;padding:16px;border-radius:14px;background:var(--cream);word-break:break-word}.hint{font-size:13px;color:#777;margin-top:8px;line-height:1.5}.footer{text-align:center;padding:20px;color:#777;font-size:12px}@media(max-width:600px){.tones{grid-template-columns:repeat(4,1fr)}textarea{font-size:21px}.output{font-size:26px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="header"><div class="logo">LIÊN HOA PINYIN</div><div class="slogan">HỌC ĐỂ THAY ĐỔI</div></header>
+  <section class="card">
+    <div class="label">Nhập Pinyin có số thanh điệu</div>
+    <textarea id="input" placeholder="Ví dụ: ni3 hao3 xue2 zhong1 wen2"></textarea>
+    <div class="tones">
+      <button class="key tone" data-tone="1">ā ē ī ō ū</button><button class="key tone" data-tone="2">á é í ó ú</button><button class="key tone" data-tone="3">ǎ ě ǐ ǒ ǔ</button><button class="key tone" data-tone="4">à è ì ò ù</button><button class="key" data-char="ü">ü</button><button class="key" data-char="⌫">⌫</button>
+    </div>
+    <div class="tones">
+      <button class="key" data-char="a">a</button><button class="key" data-char="e">e</button><button class="key" data-char="i">i</button><button class="key" data-char="o">o</button><button class="key" data-char="u">u</button><button class="key" data-char=" ">SPACE</button>
+    </div>
+    <div class="actions"><button class="action" id="convert">Chuyển số → dấu</button><button class="action secondary" id="copy">Sao chép</button><button class="action secondary" id="clear">Xóa</button></div>
+  </section>
+  <section class="card"><div class="label">Kết quả</div><div class="output" id="output">nǐ hǎo</div><div class="hint">Hỗ trợ thanh 1–4 theo Hanyu Pinyin. Ví dụ: ni3 → nǐ, hao3 → hǎo, zhong1 → zhōng.</div></section>
+  <div class="footer">Liên Hoa Global Education • Liên Hoa Pinyin Web</div>
+</div>
+<script>
+const input=document.getElementById('input'),output=document.getElementById('output');
+const toneMap={a:['a','ā','á','ǎ','à'],e:['e','ē','é','ě','è'],i:['i','ī','í','ǐ','ì'],o:['o','ō','ó','ǒ','ò'],u:['u','ū','ú','ǔ','ù'],ü:['ü','ǖ','ǘ','ǚ','ǜ']};
+function applyTone(s,t){let chars=[...s], idx=-1;for(let i=chars.length-1;i>=0;i--)if('aeo'.includes(chars[i].toLowerCase())){idx=i;break}if(idx<0)for(let i=chars.length-1;i>=0;i--)if('iuü'.includes(chars[i].toLowerCase())){idx=i;break}if(idx<0)return s;let c=chars[idx].toLowerCase();return toneMap[c]?chars.slice(0,idx).join('')+toneMap[c][t]+chars.slice(idx+1).join(''):s}
+function convert(text){return text.replace(/([a-zü]+)([1-4])/gi,(m,p,t)=>applyTone(p,Number(t))).replace(/v/gi,'ü')}
+function render(){output.textContent=convert(input.value)||'nǐ hǎo'}
+document.getElementById('convert').onclick=render;
+input.addEventListener('input',render);
+document.querySelectorAll('[data-char]').forEach(b=>b.onclick=()=>{let c=b.dataset.char;if(c==='⌫')input.value=input.value.slice(0,-1);else input.value+=c;input.focus();render()});
+document.querySelectorAll('[data-tone]').forEach(b=>b.onclick=()=>{let words=input.value.trimEnd().split(/(\s+)/);let i=words.length-1;while(i>=0&&/^\s+$/.test(words[i]))i--;if(i>=0)words[i]=applyTone(words[i].replace(/[1-4]$/,''),Number(b.dataset.tone));input.value=words.join('');input.focus();render()});
+document.getElementById('copy').onclick=async()=>{await navigator.clipboard.writeText(output.textContent);alert('Đã sao chép kết quả!')};
+document.getElementById('clear').onclick=()=>{input.value='';render();input.focus()};render();
+</script>
+</body></html>
